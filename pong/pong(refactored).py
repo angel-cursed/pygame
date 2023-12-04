@@ -5,6 +5,7 @@ class Pong():
     def __init__(self, screen_widht, screen_height):
         self.screen_widht = screen_widht
         self.screen_height = screen_height
+        self.chosed_button = None
 
         #Game Rectangles
         self.ball = pygame.Rect(screen_widht/2 - 15, screen_height/2 - 15, 30, 30)
@@ -187,46 +188,102 @@ class button():
         if current_time - self.click_time >= 500:
             if self.text == "Solo Mode":
                 game.set_mode("solo")
-            else:
+            elif self.text == "Duo Mode":
                 game.set_mode("duo")
+            else:
+                game.button_chosed = self.text
+
+def pause_menu():
+
+    button_resume = button("Resume", 200, 100, (screen_widht/2 - 100, screen_height/2 - 300), 10)
+    button_quit = button("Quit", 200, 100, (screen_widht/2 - 100, screen_height/2 - 150),10)
+    button_change_mode = button("Gamemode", 200, 100, (screen_widht/2 - 100, screen_height/2), 10)
+    button_restart = button("Restart", 200, 100, (screen_widht/2 -100, screen_height/2 + 150), 10)
+
+    game.button_chosed = None
+
+    while game.button_chosed is None:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        if button_quit.click_time:
+            button_quit.clicked()
+        if button_restart.click_time:
+            button_restart.clicked()
+        if button_change_mode.click_time:
+            button_change_mode.clicked()
+        if button_resume.click_time:
+            button_resume.clicked()
+
+        # Visuals
+        screen.fill(game.bg_color)
+        pygame.draw.rect(screen, game.yellow, game.player)
+        pygame.draw.rect(screen, game.yellow, game.opponent)
+        pygame.draw.ellipse(screen, game.yellow, game.ball)
+        pygame.draw.aaline(screen, game.yellow, (screen_widht / 2, 0), (screen_widht / 2, screen_height))
+
+        player_text = game.game_font.render(f"{game.player_score}", False, game.yellow)
+        screen.blit(player_text, (screen_widht / 2 + 20, screen_height / 2))
+
+        opponent_text = game.game_font.render(f"{game.opponent_score}", False, game.yellow)
+        screen.blit(opponent_text, (screen_widht / 2 - 40, screen_height / 2))
+
+        dark_surface = pygame.Surface((screen_widht, screen_height), pygame.SRCALPHA)
+        dark_surface.fill((0, 0, 0, 128))
+        screen.blit(dark_surface, (0, 0))
+
+        button_resume.draw()
+        button_quit.draw()
+        button_change_mode.draw()
+        button_restart.draw()
 
 
+        # Updating the window
+        pygame.display.flip()
+        clock.tick(60)
 
-#General Setup
-pygame.init()
-clock = pygame.time.Clock()
+    print(game.button_chosed)
+    if game.button_chosed == button_quit.text:
+        pygame.quit()
+        sys.exit()
+    elif game.button_chosed == button_change_mode.text:
+        change_gamemode()
+    elif game.button_chosed == button_restart.text:
+        game.player_score, game.opponent_score = 0,0
+        game.score_time = pygame.time.get_ticks()
+        game.ball_restart()
 
-#SMain Window
-screen_widht = 1280
-screen_height = 760
-screen = pygame.display.set_mode((screen_widht, screen_height))
-pygame.display.set_caption("Pong")
+def change_gamemode():
 
-game = Pong(screen_widht, screen_height)
+    button_solo = button("Solo Mode", 200, 100, (screen_widht/2 - 300, screen_height/2 - 50), 10)
+    button_duo = button("Duo Mode", 200, 100, (screen_widht/2 + 100, screen_height/2 - 50), 10)
+    game.game_mode = None
 
-button_solo = button("Solo Mode", 200, 100, (screen_widht/2 - 300, screen_height/2 - 50), 10)
-button_duo = button("Duo Mode", 200, 100, (screen_widht/2 + 100, screen_height/2 - 50), 10)
+    while game.game_mode is None:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
-while game.game_mode is None:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+        if button_solo.click_time and not button_duo.click_time:
+            button_solo.clicked()
+        if button_duo.click_time and not button_solo.click_time:
+            button_duo.clicked()
 
-    if button_solo.click_time and not button_duo.click_time:
-        button_solo.clicked()
-    if button_duo.click_time and not button_solo.click_time:
-        button_duo.clicked()
-        
+        screen.fill((136, 160, 168))
+        button_solo.draw()
+        button_duo.draw()
+        pygame.display.update()
+        clock.tick(60)
+    game.player_score = 0
+    game.opponent_score = 0
+    game.score_time = pygame.time.get_ticks()
+    game.ball_restart()
 
-    screen.fill((136,160,168))
-    button_solo.draw()
-    button_duo.draw()
-    pygame.display.update()
-    clock.tick(60)
-
-while True:
-    #Handling Inputs
+def check_input():
+    # Handling Inputs
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -243,6 +300,9 @@ while True:
                 if event.key == pygame.K_s:
                     game.opponent_speed += 7
 
+            if event.key == pygame.K_ESCAPE:
+                pause_menu()
+
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_DOWN:
                 game.player_speed -= 7
@@ -254,6 +314,25 @@ while True:
                     game.opponent_speed += 7
                 if event.key == pygame.K_s:
                     game.opponent_speed -= 7
+
+#General Setup
+pygame.init()
+clock = pygame.time.Clock()
+
+#SMain Window
+screen_widht = 1280
+screen_height = 760
+screen = pygame.display.set_mode((screen_widht, screen_height))
+pygame.display.set_caption("Pong Ultimate")
+pygame.display.set_icon(pygame.image.load("pong_icon.png"))
+
+game = Pong(screen_widht, screen_height)
+
+change_gamemode()
+
+while True:
+
+    check_input()
 
     game.ball_animation()
     game.player_animation()
