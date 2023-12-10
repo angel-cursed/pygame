@@ -319,12 +319,13 @@ def check_input():
 pygame.init()
 clock = pygame.time.Clock()
 
-#SMain Window
+# Main Window
 screen_widht = 1280
 screen_height = 760
-screen = pygame.display.set_mode((screen_widht, screen_height))
 pygame.display.set_caption("Pong Ultimate")
 pygame.display.set_icon(pygame.image.load("pong_icon.png"))
+screen = pygame.display.set_mode((screen_widht, screen_height))
+
 
 game = Pong(screen_widht, screen_height)
 
