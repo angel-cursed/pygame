@@ -9,4 +9,4 @@ class Tile(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self, x_shift):
-        self.rect.x -= x_shift
+        self.rect.x += x_shift
