@@ -18,14 +18,16 @@ class Player(pygame.sprite.Sprite):
         self.direction += self.gravity
 
 
-    def check_jump(self):
+    def check_jump(self, sound):
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_SPACE]:
             self.direction = self.jump_speed
+            sound.stop()
+            sound.play(loops = 0)
 
-    def update(self, events):
+    def update(self, events, sound):
         self.apply_gravity()
-        self.check_jump()
+        self.check_jump(sound)
         self.rect.y += self.direction
 

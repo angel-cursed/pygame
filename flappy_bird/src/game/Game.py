@@ -29,6 +29,15 @@ class Game():
         self.quit_button = self.button((self.screen_width/2, self.screen_height/2 + 228), self.Path.ASSETS / "button_quit.png", self.Path.ASSETS / "button_quit_clicked.png", self, "Quit")
         self.menu_choice = None
 
+        self.flap_sound = pygame.mixer.Sound(self.Path.SOUND / "flap.mp3")
+        self.flap_sound.set_volume(0.5)
+        self.die_sound = pygame.mixer.Sound(self.Path.SOUND / "die.mp3")
+        self.die_sound.set_volume(0.5)
+        self.point_sound = pygame.mixer.Sound(self.Path.SOUND / "point.mp3")
+        self.song = pygame.mixer.Sound(self.Path.SOUND / "song.mp3")
+        self.song.set_volume(0.5)
+        self.song.play(-1, )
+
     def collide_pipes(self):
         player = self.player.sprite
         if pygame.sprite.spritecollide(player, self.pipes, False, pygame.sprite.collide_mask):
@@ -44,7 +53,9 @@ class Game():
     def check_score(self):
         for pipe in self.pipes.sprites():
             if -4 < self.player.sprite.rect.center[0] - pipe.rect.center[0] < 4:
-                self.score += 0.5
+                if pipe.flip == False:
+                    self.score += 1
+                    self.point_sound.play()
 
     def draw(self):
         self.screen.fill("black")
@@ -73,6 +84,7 @@ class Game():
                 json.dump({"score": int(self.score)}, f, indent=3)
         self.score = 0
         self.phase = self.phases.MENU_PHASE
+        self.die_sound.play()
 
     def difficulty_of_pipes(self):
         if self.score < 15:
@@ -122,7 +134,7 @@ class Game():
                     sys.exit()
             if self.phase == self.phases.GAME_PHASE:
                 self.spawn_pipes()
-                self.player.update(pygame.event.get())
+                self.player.update(pygame.event.get(), self.flap_sound)
                 self.pipes.update(self.world_shift, self.pipes_movements)
                 self.collide_pipes()
                 self.screen_collisions()
@@ -141,7 +153,7 @@ class Game():
                     if self.menu_choice == "Play":
                         self.phase = self.phases.GAME_PHASE
                         self.menu_choice = None
-                        self.score = 0
+                        self.score = 30
                     elif self.menu_choice == "Quit":
                         pygame.quit()
                         sys.exit()

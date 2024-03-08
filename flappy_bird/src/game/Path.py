@@ -7,3 +7,4 @@ class Root():
         self.ASSETS = self.DATA / "assets"
         self.FONT = self.DATA / "font"
         self.JSON = self.DATA / "json"
+        self.SOUND = self.DATA / "sound"
