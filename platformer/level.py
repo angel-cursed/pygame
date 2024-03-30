@@ -91,17 +91,6 @@ class Level:
         player = self.player.sprite
         player.apply_gravity()
 
-        for tile in self.tiles.sprites():
-            if player.rect.colliderect(tile.rect):
-                if player.direction.y > 0:
-                    player.rect.bottom = tile.rect.top
-                    player.direction.y = 0
-                    player.on_ground = True
-                elif player.direction.y < 0:
-                    player.rect.top = tile.rect.bottom
-                    player.direction.y = 0
-                    player.on_ceiling = True
-
         if player.on_ground and player.direction.y < 0 or player.direction.y > 1:
             player.on_ground = False
         if player.on_ceiling and player.direction.y > 0:
